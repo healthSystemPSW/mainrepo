@@ -58,13 +58,13 @@ services:
       INTEGRATION_DB_PATH: "host=integrationdb;port=5432;database=INTEGRATION;username=postgres;password=postgres"
       RABBITMQ_HOST: "rabbitmq"
 
-  patient-ui:
-    build:
-      context: ../
-      dockerfile: Stacks/Build/PatientUi/Dockerfile
-    ports:
-      - "8081:8081"
-    container_name: patient-ui
+  #patient-ui:
+  #  build:
+  #    context: ../
+  #    dockerfile: Stacks/Build/PatientUi/Dockerfile
+  #  ports:
+  #    - "8081:8081"
+  #  container_name: patient-ui
 
   manager-ui:
     build:
