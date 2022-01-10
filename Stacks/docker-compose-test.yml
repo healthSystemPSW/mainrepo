@@ -1,0 +1,120 @@
+version: '3.4'
+
+services:
+
+  gateway:
+    build:
+      context: ./
+      dockerfile: Stacks/Build/Gateway/Dockerfile
+      target: gateway
+      args:
+        - HOSPITAL_API_URL=hospitalapi:80
+        - INTEGRATION_API_URL=integrationapi:80
+    restart: on-failure
+    ports:
+      - 8080:8080
+    depends_on:
+      - hospitalapi
+      - pharmacyapi
+      - integrationapi
+
+  hospitalapi:
+    build:
+      dockerfile: Stacks/Build/Hospital/Dockerfile
+      context: ./
+    ports:  
+      - "8088:80"
+    restart: on-failure
+    depends_on:
+      - hospitaldb
+    environment:
+      HOSPITAL_DB_PATH: "host=hospitaldb;port=5432;database=HOSPITAL;username=postgres;password=postgres"
+
+  pharmacyapi:
+    build:
+      dockerfile: Stacks/Build/Pharmacy/Dockerfile
+      context: ./
+    ports:  
+      - "8089:80"
+    restart: on-failure
+    depends_on:
+      - pharmacydb
+      - rabbitmq
+    environment:
+      PHARMACY_DB_PATH: "host=pharmacydb;port=5432;database=PHARMACY;username=postgres;password=postgres"
+      RABBITMQ_HOST: "rabbitmq"
+
+  integrationapi:
+    build:
+      dockerfile: Stacks/Build/Integration/Dockerfile
+      context: ./
+    ports:  
+      - "8090:80"
+    restart: on-failure
+    depends_on:
+      - integrationdb
+      - rabbitmq
+    environment:
+      INTEGRATION_DB_PATH: "host=integrationdb;port=5432;database=INTEGRATION;username=postgres;password=postgres"
+      RABBITMQ_HOST: "rabbitmq"
+
+  patient-ui:
+    build:
+      context: ./
+      dockerfile: Stacks/Build/PatientUi/Dockerfile
+    ports:
+      - "8081:8081"
+    container_name: patient-ui
+
+  manager-ui:
+    build:
+      context: ./
+      dockerfile: Stacks/Build/ManagerUi/Dockerfile
+    ports:
+      - "8082:8082"
+    container_name: manager-ui
+
+  integration-ui:
+    build:
+      context: ./
+      dockerfile: Stacks/Build/IntegrationUi/Dockerfile
+    ports:
+      - "8083:8083"
+    container_name: integration-ui
+
+  hospitaldb:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_DB: "HOSPITAL"
+    ports:
+      - 5454:5432
+
+  pharmacydb:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_DB: "PHARMACY"
+    ports:
+      - 5455:5432
+
+  integrationdb:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_DB: "INTEGRATION"
+    ports:
+      - 5456:5432
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+        - 5672:5672
+        - 15672:15672
