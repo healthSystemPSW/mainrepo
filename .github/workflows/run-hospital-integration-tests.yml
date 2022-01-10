@@ -15,10 +15,8 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Start dependencies (docker-compose)
-        run: |
-          cd Stacks
-          docker-compose build
-          docker-compose up
+        working-directory: Stacks
+        run: docker-compose up
 
       - name: Install .NET Core SDKs
         uses: actions/setup-dotnet@v1
