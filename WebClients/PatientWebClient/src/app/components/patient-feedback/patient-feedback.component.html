@@ -9,14 +9,22 @@
                                 <div class="d-flex flex-row user-info"><img class="rounded-circle"
                                         src="https://t4.ftcdn.net/jpg/03/46/93/61/360_F_346936114_RaxE6OQogebgAWTalE1myseY1Hbb5qPM.jpg"
                                         width="40">
-                                    <div class="d-flex flex-column justify-content-start ml-2"><span
-                                            class="d-block font-weight-bold name">{{feedback.patient.firstName}}
-                                            {{feedback.patient.lastName}}</span><span class="date text-black-50">Shared
+                                    <div class="d-flex flex-column justify-content-start ml-2" >
+                                        <span *ngIf = "!feedback.isAnonymous; else Anonymous" class="d-block font-weight-bold name">{{feedback.patient.firstName}}
+                                            {{feedback.patient.lastName}}
+                                        </span>
+                                        <ng-template #Anonymous class="d-block font-weight-bold name">
+                                          Anonymous user 
+                                        </ng-template>
+                                        <span class="date text-black-50">Shared
                                             publicly
-                                            - {{feedback.createdDate | date}}</span></div>
+                                            - {{feedback.createdDate | date}}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div class="mt-2">
-                                    <p class="comment-text">{{feedback.text}}
+                                <div class="mt-2" >
+                                 
+                                    <p class="comment-text">{{feedback.text}}</p>
                                 </div>
                             </div>
                         </div>

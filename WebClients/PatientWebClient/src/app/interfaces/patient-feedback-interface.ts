@@ -14,6 +14,7 @@ export interface IPatientFeedback {
     createdDate: Date;
     text: String;
     isPublishable: Boolean;
+    isAnonymous: Boolean;
 
 
 

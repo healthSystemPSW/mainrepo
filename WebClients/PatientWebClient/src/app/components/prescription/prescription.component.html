@@ -46,7 +46,9 @@
           From {{ prescription.startDate | date }} to
           {{ prescription.endDate | date }}
         </span>
-        <span> {{ prescription.medication.timesPerDay }} times per day</span>
+        <br><br>
+        <span>{{ prescription.medication.timesPerDay }} times per day </span>
+        <br><br>
         <span> {{ prescription.medication.howToUse }} </span>
       </div>
       <br />
