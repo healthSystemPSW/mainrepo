@@ -26,23 +26,23 @@ namespace HospitalIntegrationTests
         [Fact]
         public async Task Create_answered_survey_should_return_200OK()
         {
+            //Arrange
             RegisterAndLogin("Patient");
             var patient = UoW.GetRepository<IPatientReadRepository>()
                .GetAll()
                .Where(x => x.UserName == "testPatientUsername")
                .FirstOrDefault();
-
             AnsweredSurveyDTO answeredSurveyDTO = ArrangeDatabase(patient);
+            var eventId = answeredSurveyDTO.ScheduledEventId;
             var content = GetContent(answeredSurveyDTO);
 
+            //Act
             var response = await PatientClient.PostAsync(BaseUrl + "api/AnsweredSurvey/CreateAnsweredSurvey/" + patient.UserName, content);
             var responseContent = await response.Content.ReadAsStringAsync();
             var answeredSurveyResult = JsonConvert.DeserializeObject<AnsweredSurvey>(responseContent);
 
+            //Assert
             response.StatusCode.ShouldBe(HttpStatusCode.OK);
-           
-
-            var eventId = answeredSurveyDTO.ScheduledEventId;
             var answeredSurveyDB = UoW.GetRepository<IAnsweredSurveyReadRepository>().GetAll().FirstOrDefault(x => x.ScheduledEventId == eventId);
             answeredSurveyDB.ScheduledEvent.Id.ShouldBe(eventId);
 

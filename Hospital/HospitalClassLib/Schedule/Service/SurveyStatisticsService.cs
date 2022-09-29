@@ -14,6 +14,7 @@ namespace Hospital.Schedule.Service
         {
             _uow = uow;
             _answeredQuestionRepo = _uow.GetRepository<IAnsweredQuestionReadRepository>();
+
         }
         /**
          *  double AverageRating 
@@ -41,19 +42,18 @@ namespace Hospital.Schedule.Service
             }
 
             return questionStatistics;
+
         }
         public List<CategoryStatistic> GetAverageQuestionRatingForAllSurveyCategories()
         {
-           
             var all = _answeredQuestionRepo.GetAverageQuestionRatingForAllCategories();
             return all;
+
         }
         /*
-         Exposing private method state so it can be testted
-         Ova metoda se ne poziva u kontroleru 
+         Exposing private method state so it can be tested
+         Ova metoda se poziva samo iz metoda servisa 
          */
-
-
         public static List<double> RatingCountsForOneQuestion(List<RatingCount> ratingCounts, int QuestionId)
         {
             double[] ratings = new double[5];
@@ -62,6 +62,7 @@ namespace Hospital.Schedule.Service
                 ratings[r.Rating - 1] = r.Count;
             }
             return ratings.ToList();
+
         }
     }
 }

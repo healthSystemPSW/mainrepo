@@ -1,10 +1,6 @@
-﻿using Hospital.RoomsAndEquipment.Model;
-using Hospital.SharedModel.Model;
+﻿using Hospital.SharedModel.Model;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hospital.GraphicalEditor.Model
 {
@@ -29,8 +25,14 @@ namespace Hospital.GraphicalEditor.Model
             if (this.Width < 0 || this.Height < 0 || DimensionX < 0 || DimensionY < 0)
                 throw new ArgumentException("Dimensions must be larger than 0!");
         }
-
-
+        public override bool Equals(Object obj)
+        {
+            return (obj is RoomPosition position) 
+                 && position.Height == Height
+                 && position.Width == Width
+                 && position.DimensionX == DimensionX
+                 && position.DimensionY == DimensionY;
+        }
         public RoomPosition AddWidth(double width) {
             double newWidth = this.Width + width;
             return new RoomPosition(this.DimensionX, this.DimensionY, newWidth, this.Height);
@@ -48,6 +50,11 @@ namespace Hospital.GraphicalEditor.Model
             yield return DimensionY;
             yield return Width;
             yield return Height;
+        }
+
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException();
         }
     }
 }

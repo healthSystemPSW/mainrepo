@@ -32,8 +32,15 @@ namespace Hospital.Schedule.Service
 
         public List<ScheduledEvent> GetFinishedUserEvents(string userName)
         {
-
-            return UoW.GetRepository<IScheduledEventReadRepository>().GetFinishedUserEvents(userName);        
+            User user = UoW.GetRepository<IPatientReadRepository>().GetByUsername(userName);
+            if (user != null)
+            {
+                return UoW.GetRepository<IScheduledEventReadRepository>().GetFinishedUserEvents(userName);
+            }
+            else
+            {
+                throw new Exception("USER NOT FOUND.");
+            }
 
         }
         public List<EventForSurvey> GetEventsForSurvey(string userName)

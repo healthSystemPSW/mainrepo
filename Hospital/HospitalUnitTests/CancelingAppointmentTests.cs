@@ -12,67 +12,48 @@ namespace HospitalUnitTests
 {
     public class CancelingAppointmentTests : BaseTest
     {
-        private readonly ScheduledEventService _scheduledEventService;
+      
         public CancelingAppointmentTests(BaseFixture fixture) : base(fixture)
         {
-            _scheduledEventService = new(UoW);
+
         }
 
-        //TODO : KAKO HENDLOVATI DATUME
-        //MOGLO BI SE RECI DA SU OVDJE ZBOG DATUMA TESTOVI CODEPENDANT 
-        //IMA JEDAN FALSE POSITIVE ? OR IS IT
         [Fact]
         public void Appointment_should_be_cancelled()
         {
-            ClearDbContext();
-            ScheduledEvent events = CreateDbContext(isCanceled: false, isDone: false);
+            //Arrange
+            ScheduledEvent events = CreateEventWithDate(DateTime.Now.AddDays(3), DateTime.Now.AddDays(3));
+          
             Patient testPatient = events.Patient;
-
+            //Act
             testPatient.CancelAppointment(events.Id);
-            testPatient.ScheduledEvents.Count.ShouldNotBe(0);
+            //Assert
             testPatient.ScheduledEvents[0].IsCanceled.ShouldBeTrue();
-            //_scheduledEventService.GetCanceledUserEvents("testPatient").Count.ShouldBe(1); //FALSE POSITIVE //novi act & assert
         }
 
         [Fact]
         public void Appointment_should_not_be_cancelled()
         {
-            ClearDbContext();
-            ScheduledEvent events  = CreateDbContext(isCanceled: false, isDone: false);
+            //Arrange
+            ScheduledEvent events = CreateEventWithDate(DateTime.Now.AddDays(2), DateTime.Now.AddDays(2));
+          
             Patient testPatient = events.Patient;
-
-            UpdateEventTime(events);
+            //Act
             testPatient.CancelAppointment(events.Id);
+            //Assert
             testPatient.ScheduledEvents[0].IsCanceled.ShouldBeFalse();
-            _scheduledEventService.GetCanceledUserEvents("testPatient").Count.ShouldBe(0);
         }
 
-        private void UpdateEventTime(ScheduledEvent scheduled)
-        {
-            //TODO : DONE
-            scheduled.UpdateTime(new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.AddDays(2).Day), new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.AddDays(2).Day));
-            Context.SaveChanges();
-        }
-
-        [Fact]
-        public void Finished_appointment_should_not_be_cancelled()
+        private ScheduledEvent CreateEventWithDate(DateTime startDate, DateTime endDate)
         {
             ClearDbContext();
-            ScheduledEvent events = CreateDbContext(isCanceled: false, isDone: true);
-            Patient testPatient = events.Patient;
-            testPatient.CancelAppointment(events.Id);
-            _scheduledEventService.GetCanceledUserEvents("testPatient").Count.ShouldBe(0);
-        }
-
-        private ScheduledEvent CreateDbContext(bool isCanceled, bool isDone)
-        {
-            Patient testPatient = new(1,"testPatient",new MedicalRecord());      
+            Patient testPatient = new(1, "testPatient", new MedicalRecord());
             Context.Patients.Add(testPatient);
- 
-            Doctor testDoctor = new(2, new Shift().Id, new Specialization(), new Room());          
+
+            Doctor testDoctor = new(2, new Shift().Id, new Specialization(), new Room());
             Context.Doctors.Add(testDoctor);
-           
-            ScheduledEvent scheduledEvent = new(0, isCanceled, isDone, new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.AddDays(3).Day), new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.AddDays(3).Day),
+
+            ScheduledEvent scheduledEvent = new(1, 0, false, false, startDate, endDate,
                        new DateTime(), testPatient.Id, testDoctor.Id, testDoctor);
 
             Context.ScheduledEvents.Add(scheduledEvent);
@@ -80,5 +61,19 @@ namespace HospitalUnitTests
             Context.SaveChanges();
             return scheduledEvent;
         }
+
+
+
+        /*  [Fact]
+      public void Finished_appointment_should_not_be_cancelled()
+      {
+
+          ScheduledEvent events = _scheduledEventService.GetScheduledEvent(1);
+          events.SetToDone();
+          Patient testPatient = events.Patient;
+          testPatient.CancelAppointment(events.Id);
+          _scheduledEventService.GetCanceledUserEvents("testPatient").Count.ShouldBe(0);
+      */
+
     }
 }

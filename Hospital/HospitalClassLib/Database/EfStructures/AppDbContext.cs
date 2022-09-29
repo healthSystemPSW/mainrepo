@@ -1,5 +1,4 @@
 ﻿using Hospital.EventStoring.Model;
-using Hospital.GraphicalEditor.Model;
 using Hospital.MedicalRecords.Model;
 using Hospital.RoomsAndEquipment.Model;
 using Hospital.Schedule.Model;

@@ -1,9 +1,10 @@
 ﻿using System.Net.Mail;
+using System.Threading.Tasks;
 
 namespace Integration.Shared.Repository
 {
     public interface ISmtpClient 
     {
-        void Send(MailMessage mailMessage, System.Net.NetworkCredential networkCredential);
+        Task SendMailAsync(MailMessage mail);
     }
 }

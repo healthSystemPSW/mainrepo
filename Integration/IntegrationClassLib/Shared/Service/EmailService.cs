@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Mail;
 using System.Text;
+using System.Threading.Tasks;
 using Integration.Pharmacies.Model;
 using Integration.Shared.Repository;
 using Integration.Tendering.Model;
@@ -14,17 +14,15 @@ namespace Integration.Shared.Service
     {
         private readonly string _hospitalName = "Nasa bolnica";
         private readonly string _hospitalEmail = "psw.company2@gmail.com";
-        private readonly string _emailPassword = Environment.GetEnvironmentVariable("HOSPITAL_EMAIL_PASSWORD");
-        private ISmtpClient _smtpClient;
+        private readonly ISmtpClientGenerator _smtpClientGenerator;
 
         public EmailService()
         {
-
         }
 
-        public EmailService(ISmtpClient smtpClient)
+        public EmailService(ISmtpClientGenerator smtpClient)
         {
-            _smtpClient = smtpClient;
+            _smtpClientGenerator = smtpClient;
         }
 
         public void SendNewTenderMail(Tender tender, IEnumerable<Pharmacy> pharmacies)
@@ -84,7 +82,7 @@ namespace Integration.Shared.Service
 
         private static string PrepareMailNames(IEnumerable<Pharmacy> pharmacies)
         {
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
             foreach (string pharmacyMail in pharmacies.Select(x => x.Email))
             {
                 builder.Append(pharmacyMail);
@@ -97,18 +95,24 @@ namespace Integration.Shared.Service
         }
 
 
-        virtual public void SendMail(string mail, string title, string text, NetworkCredential credentials)
+        public async Task SendMail(string emailTo, string title, string text)
         {
-            MailMessage mailMessage = new();
-            mailMessage.From = new MailAddress(_hospitalEmail);
-            mailMessage.To.Add(mail);
+            MailMessage mailMessage = new(_hospitalEmail, emailTo) { 
+                IsBodyHtml = true,
+                Subject = title,
+                Body = text,
+            };
+            var client = _smtpClientGenerator.GenerateClient();
+            
+            try
+            {
+               await client.SendMailAsync(mailMessage);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Message not send error: { " + ex.Message + "}");
 
-            mailMessage.Subject = title;
-            mailMessage.IsBodyHtml = true;
-            mailMessage.Body = text;
-                   
-            //unamanaged dependency
-            _smtpClient.Send(mailMessage, credentials);
+            }
         }
     }
 }

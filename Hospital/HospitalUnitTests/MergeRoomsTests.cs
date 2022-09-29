@@ -23,19 +23,39 @@ namespace HospitalUnitTests
         }
 
         [Fact]
-        public void Room_position_should_change()
+        public void Room_position_should_change_comparer()
         {
+            //Arrange
             PrepareData();
             var roomRenovationEvent = _roomRenovationEventRead.GetById(1);
-            _renovatingRoomsService.MergeRooms(roomRenovationEvent);
             var newRoom = UoW.GetRepository<IRoomReadRepository>().GetById(1);
+            //Act
+            _renovatingRoomsService.MergeRooms(roomRenovationEvent);
+           
            /*newRoom.RoomPosition.Height.ShouldBe(244);
             newRoom.RoomPosition.Width.ShouldBe(244);
             newRoom.RoomPosition.DimensionX.ShouldBe(0);
             newRoom.RoomPosition.DimensionY.ShouldBe(0);*/
+           //Assert
             Assert.Equal(newRoom.RoomPosition, new RoomPosition(0, 0, 150, 244), new RoomPositionComparer());
 
         }
+
+        [Fact]
+        public void Room_position_should_change_x()
+        {
+            //Arrange
+            PrepareData();
+            var roomRenovationEvent = _roomRenovationEventRead.GetById(1);
+            var newRoom = UoW.GetRepository<IRoomReadRepository>().GetById(1);
+
+            //Act
+            _renovatingRoomsService.MergeRooms(roomRenovationEvent);
+           //Assert
+            Assert.True(newRoom.RoomPosition.Equals(new RoomPosition(0, 0, 150, 244)));
+
+        }
+
         [Fact]
         public void Two_rooms_should_be_merged()
         {

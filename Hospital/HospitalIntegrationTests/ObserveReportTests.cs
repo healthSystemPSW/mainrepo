@@ -21,16 +21,17 @@ namespace HospitalIntegrationTests
         [Fact]
         public async Task Report_count_should_not_be_zeroAsync()
         {
-
+            //Arrange
             RegisterAndLogin("Patient");
             ScheduledEvent events = ArrangeDatabase();
             events.SetToDone();
             UoW.GetRepository<IScheduledEventWriteRepository>().Update(events, true);
 
+            //Act
             var response = await PatientClient.GetAsync(BaseUrl + "api/Report/GetReport?eventId=" + events.Id);
+           
+            //Assert
             response.StatusCode.ShouldBe(HttpStatusCode.OK);
-
-
             UoW.GetRepository<IReportReadRepository>().GetReport(events.Id).ShouldNotBe(null);
             UoW.GetRepository<IReportReadRepository>().GetAll().ToList().Count.ShouldNotBe(0);
 

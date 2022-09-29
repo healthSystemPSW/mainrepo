@@ -23,6 +23,7 @@ namespace Hospital.RoomsAndEquipment.Model
 
         public IEnumerable<ScheduledEvent> ScheduledEvents { get; set; }
 
+      
         public bool AreNeighbors(Room room)
         {
             RoomPosition position = room.RoomPosition;

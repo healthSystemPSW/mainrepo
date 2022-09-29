@@ -1,5 +1,4 @@
 ﻿using Hospital.GraphicalEditor.Model;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -7,11 +6,7 @@ namespace HospitalUnitTests
 {
     internal class RoomPositionComparer : IEqualityComparer<RoomPosition>
     {
-       // public CaseInsensitiveComparer myComparer;
-       /* public RoomPositionComparer()
-        {
-            myComparer = CaseInsensitiveComparer.DefaultInvariant;
-        }*/
+      
         public bool Equals(RoomPosition x, RoomPosition y)
         {
             if (x is null && y is null)

@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Net;
+using System.Linq;
 using System.Net.Mail;
+using System.Threading.Tasks;
 using Integration.Pharmacies.Model;
 using Integration.Shared.Model;
 using Integration.Shared.Repository;
@@ -16,6 +17,7 @@ namespace IntegrationUnitTests
 {
     public class EmailTests : BaseTest
     {
+        private readonly string _hospitalEmail = "psw.company2@gmail.com";
         public EmailTests(BaseFixture fixture) : base(fixture)
         {
             ClearDbContext();
@@ -30,7 +32,7 @@ namespace IntegrationUnitTests
             bool exceptionCaught = false;
             try
             {
-              //  eService.SendMail("psw.company2.pharmacy@gmail.com,psw.company2@gmail.com", "testTitle", "testText");
+               eService.SendMail("psw.company2.pharmacy@gmail.com,psw.company2@gmail.com", "testTitle", "testText");
             }
             catch(Exception e)
             {
@@ -42,25 +44,51 @@ namespace IntegrationUnitTests
         [Fact]
         public void Send_email_verify()
         {
+           /* //Arrange
             var mock = new Mock<ISmtpClient>();
-            
-                
             EmailService emailService = new(mock.Object);
-            NetworkCredential Credentials = new("psw.company2@gmail.com", "Dont panic!");
-            emailService.SendMail("psw.company2.pharmacy@gmail.com,psw.company2@gmail.com", "testTitle", "testText", Credentials);
 
-            /** MailMessage mailMessage = new();
-             mailMessage.From = new MailAddress("psw.company2@gmail.com");
-             mailMessage.To.Add("psw.company2.pharmacy@gmail.com,psw.company2@gmail.com");
+            //Act
+            emailService.SendMail("psw.company2.pharmacy@gmail.com,psw.company2@gmail.com", "testTitle", "testText");
+           
+            //Assert
+            mock.Verify(t => t.SendMail(It.Is<MailMessage>(s => s.Subject.Equals("testTitle"))));
+            mock.Verify(t => t.SendMail(It.Is<MailMessage>(s => s.From.Address.Equals(_hospitalEmail))));
+           */
+        }
+        [Fact]
+        public async Task SendEmailAsync_WithCorrectParams_ShouldReturnTaskComplete()
+        {
+            //Arrange
+            var _mockSmtpClientGenerator = new Mock<ISmtpClientGenerator> ();
+            var _mockSmtpClient = new Mock<ISmtpClient>();
 
-             mailMessage.Subject = "testTitle";
-             mailMessage.IsBodyHtml = true;
-             mailMessage.Body = "testText";*/
-            mock.Verify(t => t.Send(It.Is<MailMessage>(s => s.Subject.Equals("testTitle")),Credentials));
-             // mock.Verify(x => x.Send(mailMessage), Times.Once);
+            var emailFrom = _hospitalEmail;
+            var emailTo = "psw.company2.pharmacy@gmail.com,psw.company2@gmail.com";
+            var subject = "testSubject";
+            var message = "testText";
+
+            _mockSmtpClientGenerator.Setup(generator => generator.GenerateClient())
+            .Returns(_mockSmtpClient.Object);
+           
+            EmailService emailService = new(_mockSmtpClientGenerator.Object);
+
+            // Act
+            var result = emailService.SendMail(
+                emailTo,
+                subject,
+                message);
+
+            await result;
+
+            // Assert
+            Assert.True(result.IsCompletedSuccessfully);
+            _mockSmtpClient.Verify(t => t.SendMailAsync(It.Is<MailMessage>(s => s.Subject.Equals("testSubject"))), Times.Once);
+            _mockSmtpClient.Verify(t => t.SendMailAsync(It.Is<MailMessage>(s => s.From.Address.Equals(emailFrom))));
+
         }
 
-        [SkippableFact]
+            [SkippableFact]
         public void Send_new_tender_email()
         {
             var env = Environment.GetEnvironmentVariable("PRODUCTION");
@@ -76,7 +104,7 @@ namespace IntegrationUnitTests
                     Email = "psw.company2@gmail.com"
                 }
             };
-            Tender tender = new Tender("NEW_TENDER_EMAIL_TEST",
+            Tender tender = new("NEW_TENDER_EMAIL_TEST",
                 new TimeRange(DateTime.Now.AddDays(-1), DateTime.Now.AddDays(1)));
             tender.AddMedicationRequest(new MedicationRequest("Aspirin", 5));
             tender.AddMedicationRequest(new MedicationRequest("Brufen", 5));

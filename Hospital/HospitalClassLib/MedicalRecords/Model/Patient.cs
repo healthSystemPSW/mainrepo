@@ -46,12 +46,16 @@ namespace Hospital.MedicalRecords.Model
         {
             foreach (var se in ScheduledEvents.ToArray())
             {
-                if (se.Id == eventId && !se.IsCanceled && !se.IsDone && DateTime.Compare(DateTime.Now, se.StartDate.AddDays(-2)) <= 0)
+                if (se.Id == eventId && !se.IsCanceled && !se.IsDone)
                 {
-                    se.SetToCanceled();
-                    return true;
+                    var cmp = DateTime.Compare(DateTime.Now, se.StartDate.AddDays(-2));
+                    if (cmp <= 0)
+                    {
+                        se.SetToCanceled();
+                        return true;
+                    }
                 }
-               
+                return false;
             }
             return false;
         }

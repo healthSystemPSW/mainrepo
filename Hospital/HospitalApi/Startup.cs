@@ -129,15 +129,9 @@ namespace HospitalApi
 
 
             });
-            //
-            var sp = services.BuildServiceProvider();
-            using var scope = sp.CreateScope();
-            var scopedServices = scope.ServiceProvider;
-            var db = scopedServices.GetRequiredService<DbContext>();
 
-            db.Database.EnsureCreated();
-            InitializeDbForTests(db);
-
+            InitializeDbForTests(services);
+            
             builder.RegisterType<UnitOfWork>().As<IUnitOfWork>();
             builder.RegisterType<HttpRequestSender>().As<IHttpRequestSender>();
             builder.Populate(services);
@@ -145,10 +139,27 @@ namespace HospitalApi
             return new AutofacServiceProvider(container);
         }
 
-        private void InitializeDbForTests(DbContext db)
+        static void InitializeDbForTests(IServiceCollection services)
         {
-            var startingDb = File.ReadAllText("../../../Integration/Scripts/data.sql");
-            db.Database.ExecuteSqlRaw(startingDb);
+            var sp = services.BuildServiceProvider();
+            using var scope = sp.CreateScope();
+            var scopedServices = scope.ServiceProvider;
+            var db = scopedServices.GetRequiredService<AppDbContext>();
+            ExecuteScript(db);
+        }
+        private static void ExecuteScript(DbContext db)
+        {
+            db.Database.EnsureCreated();
+            try
+            {
+                var scriptFiles = Directory.GetFiles("../TestData/");
+                var script = string.Join('\n', scriptFiles.Select(File.ReadAllText));
+                db.Database.ExecuteSqlRaw(script);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred seeding the database with test data. Error: { " + ex.Message + " }. ");
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -173,6 +184,7 @@ namespace HospitalApi
             {
                 endpoints.MapControllers();
             });
+            
         }
     }
 }
